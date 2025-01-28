@@ -6,7 +6,7 @@ import { HttpError } from '../errors/http.error';
 import { BadRequestError } from '../errors/bad-request.error';
 
 export enum ErrorCode {
-  VALIDATION_PARSE = 'error.validation.parse',
+  BAD_REQUEST = 'error.bad_request',
   HTTP = 'error.http',
   APP = 'error.app',
   UNKNOWN = 'error.unknown',
@@ -20,8 +20,8 @@ export const errorHandler: ErrorRequestHandler = (
 ): void => {
   switch (true) {
     case err instanceof BadRequestError:
-      res.status((err as BadRequestError).status).json({
-        error: { code: 'error.bad_request', message: err.message },
+      res.status(err.status).json({
+        error: { code: ErrorCode.BAD_REQUEST, message: err.message },
       });
       break;
     case err instanceof HttpError:
