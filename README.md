@@ -19,12 +19,12 @@
 
 4. **Run database migrations:**
     ```sh
-    npx prisma migrate dev
+    npm run orm-migrate-dev
     ```
 
 5. **Generate Prisma Client:**
     ```sh
-    npx prisma generate
+    npm run orm-generate
     ```
 
 ## Running the Project
