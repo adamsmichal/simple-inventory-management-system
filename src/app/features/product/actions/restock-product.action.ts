@@ -21,7 +21,7 @@ export const restockProductAction = (commandBus: CommandBus) => {
       const { id } = req.params;
 
       const updatedProduct = await commandBus.execute<RestockProductCommand, Product>(
-        new RestockProductCommand({ id: Number(id) }),
+        new RestockProductCommand({ productId: Number(id) }),
       );
 
       res.status(200).json(updatedProduct);

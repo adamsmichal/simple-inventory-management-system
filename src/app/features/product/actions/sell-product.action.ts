@@ -21,7 +21,7 @@ export const sellProductAction = (commandBus: CommandBus) => {
       const { id } = req.params;
 
       const updatedProduct = await commandBus.execute<SellProductCommand, Product>(
-        new SellProductCommand({ id: Number(id) }),
+        new SellProductCommand({ productId: Number(id) }),
       );
 
       res.status(200).json(updatedProduct);

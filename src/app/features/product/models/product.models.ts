@@ -23,3 +23,14 @@ export interface ProductTransaction {
   productId: number;
   quantity: number;
 }
+
+export interface ProcessedProductResult {
+  extendedProducts: ExtendedProduct[];
+  total: number;
+}
+
+export interface ExtendedProduct {
+  productId: number;
+  quantity: number;
+  price: number;
+}

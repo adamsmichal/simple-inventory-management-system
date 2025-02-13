@@ -5,8 +5,8 @@ import { createOrderTransaction } from '../repository/order.repository';
 import { findProductsByIds } from 'src/app/features/product/repository/product.repository';
 import { StockError } from 'src/app/features/product/errors/stock.error';
 import { NotFoundError } from 'src/errors/not-found.error';
-import { ProductTransaction, Product } from '../../product/models/product.models';
-import { ExtendedProduct, Order } from '../model/order.model';
+import { ProductTransaction, Product, ExtendedProduct } from '../../product/models/product.models';
+import { Order } from '../model/order.model';
 
 jest.mock('../repository/order.repository', () => ({
   createOrderTransaction: jest.fn(),
