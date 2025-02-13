@@ -1,12 +1,23 @@
-import { Order as dbOrder, Product } from '@prisma/client';
-import { PayloadProduct } from '../../product/models/product.models';
+import { Order as DbOrder, Product } from '@prisma/client';
+import { ProductTransaction } from '../../product/models/product.models';
 
-export interface Order extends dbOrder {}
+export type Order = DbOrder;
+
+export interface CreateOrderPayload {
+  customerId: string;
+  products: ProductTransaction[];
+}
 
 export interface CreateOrderDbTransactionPayload {
   customerId: string;
-  products: Product[];
-  payloadProducts: PayloadProduct[];
+  rawProducts: Product[];
+  processedProducts: ProductTransaction[];
+  processProductsCallback: (processedProducts: ProductTransaction[], rawProducts: Product[]) => ProcessedProductResult;
+}
+
+export interface ProcessedProductResult {
+  extendedProducts: ExtendedProduct[];
+  total: number;
 }
 
 export interface CreateOrderDbPayload {
@@ -19,9 +30,4 @@ export interface ExtendedProduct {
   productId: number;
   quantity: number;
   price: number;
-}
-
-export interface CreateOrderPayload {
-  customerId: string;
-  products: PayloadProduct[];
 }

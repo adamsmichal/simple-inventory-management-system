@@ -8,7 +8,7 @@ export class RestockProductHandler implements CommandHandler<RestockProductComma
   commandType = 'RESTOCK_PRODUCT';
 
   async execute(command: RestockProductCommand): Promise<Product> {
-    const updatedProduct = await restockProduct(command.payload.id);
+    const updatedProduct = await restockProduct(command.payload.productId);
     return updatedProduct;
   }
 }

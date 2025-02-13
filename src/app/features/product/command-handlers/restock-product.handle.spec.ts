@@ -28,7 +28,7 @@ describe('RestockProductHandler', () => {
   });
 
   it('should restock a product successfully', async () => {
-    const command = new RestockProductCommand({ id: 1 });
+    const command = new RestockProductCommand({ productId: 1 });
 
     mockRestockProduct.mockResolvedValue(mockedProduct);
 

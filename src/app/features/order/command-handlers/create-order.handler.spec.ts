@@ -1,12 +1,12 @@
-import { CreateOrderHandler, processProductsForOrder } from './create-order.handler';
+import { CreateOrderHandler } from './create-order.handler';
 import { CreateOrderCommand } from '../commands/create-order.command';
 import { createOrderTransaction } from '../repository/order.repository';
 
 import { findProductsByIds } from 'src/app/features/product/repository/product.repository';
 import { StockError } from 'src/app/features/product/errors/stock.error';
 import { NotFoundError } from 'src/errors/not-found.error';
-import { PayloadProduct, Product } from '../../product/models/product.models';
-import { ExtendedProduct } from '../model/order.model';
+import { ProductTransaction, Product } from '../../product/models/product.models';
+import { ExtendedProduct, Order } from '../model/order.model';
 
 jest.mock('../repository/order.repository', () => ({
   createOrderTransaction: jest.fn(),
@@ -24,8 +24,8 @@ const mockedProduct: Product = {
   description: 'Description 1',
   price: 100,
   stock: 10,
-  createdAt: new Date('2025-01-27T17:46:46.174Z'),
-  updatedAt: new Date('2025-01-27T17:46:46.174Z'),
+  createdAt: new Date(),
+  updatedAt: new Date(),
 };
 
 describe('CreateOrderHandler', () => {
@@ -44,15 +44,16 @@ describe('CreateOrderHandler', () => {
     });
 
     mockFindProductsByIds.mockResolvedValue([mockedProduct]);
-    mockCreateOrderTransaction.mockResolvedValue({ id: 'order-1', total: 200 } as any);
+    mockCreateOrderTransaction.mockResolvedValue({ id: 'order-1', total: 200 } as Order);
 
     const result = await handler.execute(command);
 
     expect(mockFindProductsByIds).toHaveBeenCalledWith([1]);
     expect(mockCreateOrderTransaction).toHaveBeenCalledWith({
       customerId: '123',
-      payloadProducts: [{ productId: 1, quantity: 2 }],
-      products: [mockedProduct],
+      processedProducts: command.payload.products,
+      rawProducts: [mockedProduct],
+      processProductsCallback: expect.any(Function),
     });
     expect(result).toEqual({ id: 'order-1', total: 200 });
   });
@@ -60,7 +61,7 @@ describe('CreateOrderHandler', () => {
   it('should throw StockError when stock is insufficient', async () => {
     const command = new CreateOrderCommand({
       customerId: '123',
-      products: [{ productId: 1, quantity: 2 }],
+      products: [{ productId: 1, quantity: 20 }],
     });
 
     mockFindProductsByIds.mockResolvedValue([mockedProduct]);
@@ -71,24 +72,15 @@ describe('CreateOrderHandler', () => {
 
     await expect(handler.execute(command)).rejects.toThrow(StockError);
   });
-
-  it('should throw NotFoundError when product is not found', async () => {
-    const command = new CreateOrderCommand({
-      customerId: '123',
-      products: [{ productId: 1, quantity: 2 }],
-    });
-
-    mockFindProductsByIds.mockResolvedValue([]);
-
-    mockCreateOrderTransaction.mockImplementation(() => {
-      throw new NotFoundError('Product with ID 1 not found');
-    });
-
-    await expect(handler.execute(command)).rejects.toThrow(NotFoundError);
-  });
 });
 
 describe('processProductsForOrder', () => {
+  let handler: CreateOrderHandler;
+
+  beforeEach(() => {
+    handler = new CreateOrderHandler();
+  });
+
   const products: Product[] = [
     {
       id: 1,
@@ -111,12 +103,12 @@ describe('processProductsForOrder', () => {
   ];
 
   it('should calculate total and return extended products', () => {
-    const payloadProducts: PayloadProduct[] = [
+    const productTransaction: ProductTransaction[] = [
       { productId: 1, quantity: 2 },
       { productId: 2, quantity: 3 },
     ];
 
-    const result = processProductsForOrder(payloadProducts, products);
+    const result = handler['processProductsForOrder'](productTransaction, products);
 
     expect(result.total).toBe(350);
     expect(result.extendedProducts).toEqual<ExtendedProduct[]>([
@@ -126,22 +118,22 @@ describe('processProductsForOrder', () => {
   });
 
   it('should throw NotFoundError if a product is not found', () => {
-    const payloadProducts: PayloadProduct[] = [{ productId: 3, quantity: 1 }];
+    const productTransaction: ProductTransaction[] = [{ productId: 3, quantity: 1 }];
 
-    expect(() => processProductsForOrder(payloadProducts, products)).toThrow(
+    expect(() => handler['processProductsForOrder'](productTransaction, products)).toThrow(
       new NotFoundError('Product with ID 3 not found'),
     );
   });
 
   it('should throw StockError if a product has insufficient stock', () => {
-    const payloadProducts: PayloadProduct[] = [{ productId: 1, quantity: 11 }];
+    const productTransaction: ProductTransaction[] = [{ productId: 1, quantity: 11 }];
 
-    expect(() => processProductsForOrder(payloadProducts, products)).toThrow(new StockError(1));
+    expect(() => handler['processProductsForOrder'](productTransaction, products)).toThrow(new StockError(1));
   });
 
   it('should handle an empty product list gracefully', () => {
-    const payloadProducts: PayloadProduct[] = [];
-    const result = processProductsForOrder(payloadProducts, products);
+    const productTransaction: ProductTransaction[] = [];
+    const result = handler['processProductsForOrder'](productTransaction, products);
 
     expect(result.total).toBe(0);
     expect(result.extendedProducts).toEqual([]);

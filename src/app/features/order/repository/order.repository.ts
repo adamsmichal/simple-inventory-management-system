@@ -2,7 +2,6 @@ import { prisma } from 'src/config/db';
 
 import { CreateOrderDbPayload, Order, CreateOrderDbTransactionPayload } from '../model/order.model';
 import { updateProductStock } from '../../product/repository/product.repository';
-import { processProductsForOrder } from '../command-handlers/create-order.handler';
 
 export const createOrder = ({ customerId, total, extendedProducts }: CreateOrderDbPayload): Promise<Order> => {
   return prisma.order.create({
@@ -29,11 +28,12 @@ export const createOrder = ({ customerId, total, extendedProducts }: CreateOrder
 
 export const createOrderTransaction = async ({
   customerId,
-  products,
-  payloadProducts,
+  rawProducts,
+  processedProducts,
+  processProductsCallback,
 }: CreateOrderDbTransactionPayload): Promise<Order> => {
   return await prisma.$transaction(async _ => {
-    const { extendedProducts, total } = processProductsForOrder(payloadProducts, products);
+    const { extendedProducts, total } = processProductsCallback(processedProducts, rawProducts);
 
     for (const { productId, quantity } of extendedProducts) {
       await updateProductStock(productId, quantity);

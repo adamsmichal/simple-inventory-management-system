@@ -33,7 +33,7 @@ describe('SellProductHandler', () => {
   });
 
   it('should successfully sell a product', async () => {
-    const command = new SellProductCommand({ id: 1 });
+    const command = new SellProductCommand({ productId: 1 });
 
     mockGetProductById.mockResolvedValue(mockedProduct);
     mockSellProduct.mockResolvedValue({
@@ -52,7 +52,7 @@ describe('SellProductHandler', () => {
   });
 
   it('should throw NotFoundError if the product is not found', async () => {
-    const command = new SellProductCommand({ id: 999 });
+    const command = new SellProductCommand({ productId: 999 });
 
     mockGetProductById.mockResolvedValue(null);
 
@@ -63,7 +63,7 @@ describe('SellProductHandler', () => {
   });
 
   it('should throw StockError if the product stock is 0', async () => {
-    const command = new SellProductCommand({ id: 1 });
+    const command = new SellProductCommand({ productId: 1 });
 
     mockGetProductById.mockResolvedValue({
       ...mockedProduct,
@@ -77,7 +77,7 @@ describe('SellProductHandler', () => {
   });
 
   it('should throw StockError if the product stock is negative', async () => {
-    const command = new SellProductCommand({ id: 1 });
+    const command = new SellProductCommand({ productId: 1 });
 
     mockGetProductById.mockResolvedValue({
       ...mockedProduct,

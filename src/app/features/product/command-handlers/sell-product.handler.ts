@@ -10,10 +10,10 @@ export class SellProductHandler implements CommandHandler<SellProductCommand, Pr
   commandType = 'SELL_PRODUCT';
 
   async execute(command: SellProductCommand): Promise<Product> {
-    const product = await getProductById(command.payload.id);
+    const product = await getProductById(command.payload.productId);
 
     if (!product) {
-      throw new NotFoundError(`Product with id ${command.payload.id} not found`);
+      throw new NotFoundError(`Product with id ${command.payload.productId} not found`);
     }
 
     if (product.stock <= 0) {

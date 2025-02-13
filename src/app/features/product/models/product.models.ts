@@ -1,6 +1,6 @@
 import { Product as DbProduct } from '@prisma/client';
 
-export interface Product extends DbProduct {}
+export type Product = DbProduct;
 
 export interface CreateProductPayload {
   name: string;
@@ -12,12 +12,14 @@ export interface CreateProductPayload {
 export interface GetProductsParams {}
 
 export interface RestockProductPayload {
-  id: number;
+  productId: number;
 }
 
-export interface SellProductPayload extends RestockProductPayload {}
+export interface SellProductPayload {
+  productId: number;
+}
 
-export interface PayloadProduct {
+export interface ProductTransaction {
   productId: number;
   quantity: number;
 }
